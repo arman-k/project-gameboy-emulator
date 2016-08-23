@@ -1,0 +1,1897 @@
+//This is a comment.
+//This is the opcode database (without prefix CB) for the Gameboy CPU (LR35902).
+//The general format for every instruction is simply a list of key-value pairs and a newline following it:
+//key: value
+//key: value
+//key: value
+//..........
+//(newline).
+//valid keys are: opcode, operand, operand1, operand2, mnemonic, length, cycles and flags.
+//using any other key is undefined.
+//always place a colon and a space after the key.
+//for opcodes, specify the value as hex: 0x34, 0xB3 etc.
+//for mnemonics, if the instruction is invalid, put invalid as the value. No other keys for that instruction should be placed afterwards.
+//if there is no operand, don't put any operand key at all.
+//if there is only one operand, use either operand or operand1 as keys (don't use operand2)
+//if there are two operands, use operand1 and operand2 as keys.
+//for flags, specify them in this order: ZNHC (without spaces).
+//using '-' in place of each flag means that flag is not affected by this instruction
+//using '1' means, the flag is set by this instruction
+//using '0' means, the flag is reset by this instruction
+//using its corresponding letter means, the operation will determine the state of this flag.
+//must place a newline after every instruction block.
+//instructions with the CB prefix should be placed in the opcbdb.txt file.
+//both these db files are used to generate repetitive code or strings by codegen.exe
+//
+//the instructions as updated here now should be correct.
+//don't leave any space before the first instruction
+opcode: 0x00
+mnemonic: NOP
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x01
+mnemonic: LD
+operand1: BC
+operand2: d16
+length: 3
+cycles: 12
+flags: ----
+
+opcode: 0x02
+mnemonic: LD
+operand1: (BC)
+operand2: A
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x03
+mnemonic: INC
+operand: BC
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x04
+mnemonic: INC
+operand: B
+length: 1
+cycles: 4
+flags: Z0H-
+
+opcode: 0x05
+mnemonic: DEC
+operand: B
+length: 1
+cycles: 4
+flags: Z1H-
+
+opcode: 0x06
+mnemonic: LD
+operand1: B
+operand2: d8
+length: 2
+cycles: 8
+flags: ----
+
+opcode: 0x07
+mnemonic: RLCA
+length: 1
+cycles: 4
+flags: 000C
+
+opcode: 0x08
+mnemonic: LD
+operand1: (a16)
+operand2: SP
+length: 3
+cycles: 20
+flags: ----
+
+opcode: 0x09
+mnemonic: ADD
+operand1: HL
+operand2: BC
+length: 1
+cycles: 8
+flags: -0HC
+
+opcode: 0x0A
+mnemonic: LD
+operand1: A
+operand2: (BC)
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x0B
+mnemonic: DEC
+operand: BC
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x0C
+mnemonic: INC
+operand: C
+length: 1
+cycles: 4
+flags: Z0H-
+
+opcode: 0x0D
+mnemonic: DEC
+operand: C
+length: 1
+cycles: 4
+flags: Z1H-
+
+opcode: 0x0E
+mnemonic: LD
+operand1: C
+operand2: d8
+length: 2
+cycles: 8
+flags: ----
+
+opcode: 0x0F
+mnemonic: RRCA
+length: 1
+cycles: 4
+flags: 000C
+
+opcode: 0x10
+mnemonic: STOP
+operand: 0
+length: 2
+cycles: 4
+flags: ----
+
+opcode: 0x11
+mnemonic: LD
+operand1: DE
+operand2: d16
+length: 3
+cycles: 12
+flags: ----
+
+opcode: 0x12
+mnemonic: LD
+operand1: (DE)
+operand2: A
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x13
+mnemonic: INC
+operand: DE
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x14
+mnemonic: INC
+operand: D
+length: 1
+cycles: 4
+flags: Z0H-
+
+opcode: 0x15
+mnemonic: DEC
+operand: D
+length: 1
+cycles: 4
+flags: Z1H-
+
+opcode: 0x16
+mnemonic: LD
+operand1: D
+operand2: d8
+length: 2
+cycles: 8
+flags: ----
+
+opcode: 0x17
+mnemonic: RLA
+length: 1
+cycles: 4
+flags: 000C
+
+opcode: 0x18
+mnemonic: JR
+operand: r8
+length: 2
+cycles: 12
+flags: ----
+
+opcode: 0x19
+mnemonic: ADD
+operand1: HL
+operand2: DE
+length: 1
+cycles: 8
+flags: -0HC
+
+opcode: 0x1A
+mnemonic: LD
+operand1: A
+operand2: (DE)
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x1B
+mnemonic: DEC
+operand: DE
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x1C
+mnemonic: INC
+operand: E
+length: 1
+cycles: 4
+flags: Z0H-
+
+opcode: 0x1D
+mnemonic: DEC
+operand: E
+length: 1
+cycles: 4
+flags: Z1H-
+
+opcode: 0x1E
+mnemonic: LD
+operand1: E
+operand2: d8
+length: 2
+cycles: 8
+flags: ----
+
+opcode: 0x1F
+mnemonic: RRA
+length: 1
+cycles: 4
+flags: 000C
+
+opcode: 0x20
+mnemonic: JR
+operand1: NZ
+operand2: r8
+length: 2
+cycles: 8
+flags: ----
+
+opcode: 0x21
+mnemonic: LD
+operand1: HL
+operand2: d16
+length: 3
+cycles: 12
+flags: ----
+
+opcode: 0x22
+mnemonic: LD
+operand1: (HL+)
+operand2: A
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x23
+mnemonic: INC
+operand: HL
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x24
+mnemonic: INC
+operand: H
+length: 1
+cycles: 4
+flags: Z0H-
+
+opcode: 0x25
+mnemonic: DEC
+operand: H
+length: 1
+cycles: 4
+flags: Z1H-
+
+opcode: 0x26
+mnemonic: LD
+operand1: H
+operand2: d8
+length: 2
+cycles: 8
+flags: ----
+
+opcode: 0x27
+mnemonic: DAA
+length: 1
+cycles: 4
+flags: Z-0C
+
+opcode: 0x28
+mnemonic: JR
+operand1: Z
+operand2: r8
+length: 2
+cycles: 8
+flags: ----
+
+opcode: 0x29
+mnemonic: ADD
+operand1: HL
+operand2: HL
+length: 1
+cycles: 8
+flags: -0HC
+
+opcode: 0x2A
+mnemonic: LD
+operand1: A
+operand2: (HL+)
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x2B
+mnemonic: DEC
+operand: HL
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x2C
+mnemonic: INC
+operand: L
+length: 1
+cycles: 4
+flags: Z0H-
+
+opcode: 0x2D
+mnemonic: DEC
+operand: L
+length: 1
+cycles: 4
+flags: Z1H-
+
+opcode: 0x2E
+mnemonic: LD
+operand1: L
+operand2: d8
+length: 2
+cycles: 8
+flags: ----
+
+opcode: 0x2F
+mnemonic: CPL
+length: 1
+cycles: 4
+flags: -11-
+
+opcode: 0x30
+mnemonic: JR
+operand1: NC
+operand2: r8
+length: 2
+cycles: 8
+flags: ----
+
+opcode: 0x31
+mnemonic: LD
+operand1: SP
+operand2: d16
+length: 3
+cycles: 12
+flags: ----
+
+opcode: 0x32
+mnemonic: LD
+operand1: (HL-)
+operand2: A
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x33
+mnemonic: INC
+operand: SP
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x34
+mnemonic: INC
+operand: (HL)
+length: 1
+cycles: 12
+flags: Z0H-
+
+opcode: 0x35
+mnemonic: DEC
+operand: (HL)
+length: 1
+cycles: 12
+flags: Z1H-
+
+opcode: 0x36
+mnemonic: LD
+operand1: (HL)
+operand2: d8
+length: 2
+cycles: 12
+flags: ----
+
+opcode: 0x37
+mnemonic: SCF
+length: 1
+cycles: 4
+flags: -001
+
+opcode: 0x38
+mnemonic: JR
+operand1: C
+operand2: r8
+length: 2
+cycles: 8
+flags: ----
+
+opcode: 0x39
+mnemonic: ADD
+operand1: HL
+operand2: SP
+length: 1
+cycles: 8
+flags: -0HC
+
+opcode: 0x3A
+mnemonic: LD
+operand1: A
+operand2: (HL-)
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x3B
+mnemonic: DEC
+operand: SP
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x3C
+mnemonic: INC
+operand: A
+length: 1
+cycles: 4
+flags: Z0H-
+
+opcode: 0x3D
+mnemonic: DEC
+operand: A
+length: 1
+cycles: 4
+flags: Z1H-
+
+opcode: 0x3E
+mnemonic: LD
+operand1: A
+operand2: d8
+length: 2
+cycles: 8
+flags: ----
+
+opcode: 0x3F
+mnemonic: CCF
+length: 1
+cycles: 4
+flags: -00C
+
+opcode: 0x40
+mnemonic: LD
+operand1: B
+operand2: B
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x41
+mnemonic: LD
+operand1: B
+operand2: C
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x42
+mnemonic: LD
+operand1: B
+operand2: D
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x43
+mnemonic: LD
+operand1: B
+operand2: E
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x44
+mnemonic: LD
+operand1: B
+operand2: H
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x45
+mnemonic: LD
+operand1: B
+operand2: L
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x46
+mnemonic: LD
+operand1: B
+operand2: (HL)
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x47
+mnemonic: LD
+operand1: B
+operand2: A
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x48
+mnemonic: LD
+operand1: C
+operand2: B
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x49
+mnemonic: LD
+operand1: C
+operand2: C
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x4A
+mnemonic: LD
+operand1: C
+operand2: D
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x4B
+mnemonic: LD
+operand1: C
+operand2: E
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x4C
+mnemonic: LD
+operand1: C
+operand2: H
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x4D
+mnemonic: LD
+operand1: C
+operand2: L
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x4E
+mnemonic: LD
+operand1: C
+operand2: (HL)
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x4F
+mnemonic: LD
+operand1: C
+operand2: A
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x50
+mnemonic: LD
+operand1: D
+operand2: B
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x51
+mnemonic: LD
+operand1: D
+operand2: C
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x52
+mnemonic: LD
+operand1: D
+operand2: D
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x53
+mnemonic: LD
+operand1: D
+operand2: E
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x54
+mnemonic: LD
+operand1: D
+operand2: H
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x55
+mnemonic: LD
+operand1: D
+operand2: L
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x56
+mnemonic: LD
+operand1: D
+operand2: (HL)
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x57
+mnemonic: LD
+operand1: D
+operand2: A
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x58
+mnemonic: LD
+operand1: E
+operand2: B
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x59
+mnemonic: LD
+operand1: E
+operand2: C
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x5A
+mnemonic: LD
+operand1: E
+operand2: D
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x5B
+mnemonic: LD
+operand1: E
+operand2: E
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x5C
+mnemonic: LD
+operand1: E
+operand2: H
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x5D
+mnemonic: LD
+operand1: E
+operand2: L
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x5E
+mnemonic: LD
+operand1: E
+operand2: (HL)
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x5F
+mnemonic: LD
+operand1: E
+operand2: A
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x60
+mnemonic: LD
+operand1: H
+operand2: B
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x61
+mnemonic: LD
+operand1: H
+operand2: C
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x62
+mnemonic: LD
+operand1: H
+operand2: D
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x63
+mnemonic: LD
+operand1: H
+operand2: E
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x64
+mnemonic: LD
+operand1: H
+operand2: H
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x65
+mnemonic: LD
+operand1: H
+operand2: L
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x66
+mnemonic: LD
+operand1: H
+operand2: (HL)
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x67
+mnemonic: LD
+operand1: H
+operand2: A
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x68
+mnemonic: LD
+operand1: L
+operand2: B
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x69
+mnemonic: LD
+operand1: L
+operand2: C
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x6A
+mnemonic: LD
+operand1: L
+operand2: D
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x6B
+mnemonic: LD
+operand1: L
+operand2: E
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x6C
+mnemonic: LD
+operand1: L
+operand2: H
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x6D
+mnemonic: LD
+operand1: L
+operand2: L
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x6E
+mnemonic: LD
+operand1: L
+operand2: (HL)
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x6F
+mnemonic: LD
+operand1: L
+operand2: A
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x70
+mnemonic: LD
+operand1: (HL)
+operand2: B
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x71
+mnemonic: LD
+operand1: (HL)
+operand2: C
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x72
+mnemonic: LD
+operand1: (HL)
+operand2: D
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x73
+mnemonic: LD
+operand1: (HL)
+operand2: E
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x74
+mnemonic: LD
+operand1: (HL)
+operand2: H
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x75
+mnemonic: LD
+operand1: (HL)
+operand2: L
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x76
+mnemonic: HALT
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x77
+mnemonic: LD
+operand1: (HL)
+operand2: A
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x78
+mnemonic: LD
+operand1: A
+operand2: B
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x79
+mnemonic: LD
+operand1: A
+operand2: C
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x7A
+mnemonic: LD
+operand1: A
+operand2: D
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x7B
+mnemonic: LD
+operand1: A
+operand2: E
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x7C
+mnemonic: LD
+operand1: A
+operand2: H
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x7D
+mnemonic: LD
+operand1: A
+operand2: L
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x7E
+mnemonic: LD
+operand1: A
+operand2: (HL)
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0x7F
+mnemonic: LD
+operand1: A
+operand2: A
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0x80
+mnemonic: ADD
+operand1: A
+operand2: B
+length: 1
+cycles: 4
+flags: Z0HC
+
+opcode: 0x81
+mnemonic: ADD
+operand1: A
+operand2: C
+length: 1
+cycles: 4
+flags: Z0HC
+
+opcode: 0x82
+mnemonic: ADD
+operand1: A
+operand2: D
+length: 1
+cycles: 4
+flags: Z0HC
+
+opcode: 0x83
+mnemonic: ADD
+operand1: A
+operand2: E
+length: 1
+cycles: 4
+flags: Z0HC
+
+opcode: 0x84
+mnemonic: ADD
+operand1: A
+operand2: H
+length: 1
+cycles: 4
+flags: Z0HC
+
+opcode: 0x85
+mnemonic: ADD
+operand1: A
+operand2: L
+length: 1
+cycles: 4
+flags: Z0HC
+
+opcode: 0x86
+mnemonic: ADD
+operand1: A
+operand2: (HL)
+length: 1
+cycles: 8
+flags: Z0HC
+
+opcode: 0x87
+mnemonic: ADD
+operand1: A
+operand2: A
+length: 1
+cycles: 4
+flags: Z0HC
+
+opcode: 0x88
+mnemonic: ADC
+operand1: A
+operand2: B
+length: 1
+cycles: 4
+flags: Z0HC
+
+opcode: 0x89
+mnemonic: ADC
+operand1: A
+operand2: C
+length: 1
+cycles: 4
+flags: Z0HC
+
+opcode: 0x8A
+mnemonic: ADC
+operand1: A
+operand2: D
+length: 1
+cycles: 4
+flags: Z0HC
+
+opcode: 0x8B
+mnemonic: ADC
+operand1: A
+operand2: E
+length: 1
+cycles: 4
+flags: Z0HC
+
+opcode: 0x8C
+mnemonic: ADC
+operand1: A
+operand2: H
+length: 1
+cycles: 4
+flags: Z0HC
+
+opcode: 0x8D
+mnemonic: ADC
+operand1: A
+operand2: L
+length: 1
+cycles: 4
+flags: Z0HC
+
+opcode: 0x8E
+mnemonic: ADC
+operand1: A
+operand2: (HL)
+length: 1
+cycles: 8
+flags: Z0HC
+
+opcode: 0x8F
+mnemonic: ADC
+operand1: A
+operand2: A
+length: 1
+cycles: 4
+flags: Z0HC
+
+opcode: 0x90
+mnemonic: SUB
+operand: B
+length: 1
+cycles: 4
+flags: Z1HC
+
+opcode: 0x91
+mnemonic: SUB
+operand: C
+length: 1
+cycles: 4
+flags: Z1HC
+
+opcode: 0x92
+mnemonic: SUB
+operand: D
+length: 1
+cycles: 4
+flags: Z1HC
+
+opcode: 0x93
+mnemonic: SUB
+operand: E
+length: 1
+cycles: 4
+flags: Z1HC
+
+opcode: 0x94
+mnemonic: SUB
+operand: H
+length: 1
+cycles: 4
+flags: Z1HC
+
+opcode: 0x95
+mnemonic: SUB
+operand: L
+length: 1
+cycles: 4
+flags: Z1HC
+
+opcode: 0x96
+mnemonic: SUB
+operand: (HL)
+length: 1
+cycles: 8
+flags: Z1HC
+
+opcode: 0x97
+mnemonic: SUB
+operand: A
+length: 1
+cycles: 4
+flags: Z1HC
+
+opcode: 0x98
+mnemonic: SBC
+operand1: A
+operand2: B
+length: 1
+cycles: 4
+flags: Z1HC
+
+opcode: 0x99
+mnemonic: SBC
+operand1: A
+operand2: C
+length: 1
+cycles: 4
+flags: Z1HC
+
+opcode: 0x9A
+mnemonic: SBC
+operand1: A
+operand2: D
+length: 1
+cycles: 4
+flags: Z1HC
+
+opcode: 0x9B
+mnemonic: SBC
+operand1: A
+operand2: E
+length: 1
+cycles: 4
+flags: Z1HC
+
+opcode: 0x9C
+mnemonic: SBC
+operand1: A
+operand2: H
+length: 1
+cycles: 4
+flags: Z1HC
+
+opcode: 0x9D
+mnemonic: SBC
+operand1: A
+operand2: L
+length: 1
+cycles: 4
+flags: Z1HC
+
+opcode: 0x9E
+mnemonic: SBC
+operand1: A
+operand2: (HL)
+length: 1
+cycles: 8
+flags: Z1HC
+
+opcode: 0x9F
+mnemonic: SBC
+operand1: A
+operand2: A
+length: 1
+cycles: 4
+flags: Z1HC
+
+opcode: 0xA0
+mnemonic: AND
+operand: B
+length: 1
+cycles: 4
+flags: Z010
+
+opcode: 0xA1
+mnemonic: AND
+operand: C
+length: 1
+cycles: 4
+flags: Z010
+
+opcode: 0xA2
+mnemonic: AND
+operand: D
+length: 1
+cycles: 4
+flags: Z010
+
+opcode: 0xA3
+mnemonic: AND
+operand: E
+length: 1
+cycles: 4
+flags: Z010
+
+opcode: 0xA4
+mnemonic: AND
+operand: H
+length: 1
+cycles: 4
+flags: Z010
+
+opcode: 0xA5
+mnemonic: AND
+operand: L
+length: 1
+cycles: 4
+flags: Z010
+
+opcode: 0xA6
+mnemonic: AND
+operand: (HL)
+length: 1
+cycles: 8
+flags: Z010
+
+opcode: 0xA7
+mnemonic: AND
+operand: A
+length: 1
+cycles: 4
+flags: Z010
+
+opcode: 0xA8
+mnemonic: XOR
+operand: B
+length: 1
+cycles: 4
+flags: Z000
+
+opcode: 0xA9
+mnemonic: XOR
+operand: C
+length: 1
+cycles: 4
+flags: Z000
+
+opcode: 0xAA
+mnemonic: XOR
+operand: D
+length: 1
+cycles: 4
+flags: Z000
+
+opcode: 0xAB
+mnemonic: XOR
+operand: E
+length: 1
+cycles: 4
+flags: Z000
+
+opcode: 0xAC
+mnemonic: XOR
+operand: H
+length: 1
+cycles: 4
+flags: Z000
+
+opcode: 0xAD
+mnemonic: XOR
+operand: L
+length: 1
+cycles: 4
+flags: Z000
+
+opcode: 0xAE
+mnemonic: XOR
+operand: (HL)
+length: 1
+cycles: 8
+flags: Z000
+
+opcode: 0xAF
+mnemonic: XOR
+operand: A
+length: 1
+cycles: 4
+flags: Z000
+
+opcode: 0xB0
+mnemonic: OR
+operand: B
+length: 1
+cycles: 4
+flags: Z000
+
+opcode: 0xB1
+mnemonic: OR
+operand: C
+length: 1
+cycles: 4
+flags: Z000
+
+opcode: 0xB2
+mnemonic: OR
+operand: D
+length: 1
+cycles: 4
+flags: Z000
+
+opcode: 0xB3
+mnemonic: OR
+operand: E
+length: 1
+cycles: 4
+flags: Z000
+
+opcode: 0xB4
+mnemonic: OR
+operand: H
+length: 1
+cycles: 4
+flags: Z000
+
+opcode: 0xB5
+mnemonic: OR
+operand: L
+length: 1
+cycles: 4
+flags: Z000
+
+opcode: 0xB6
+mnemonic: OR
+operand: (HL)
+length: 1
+cycles: 8
+flags: Z000
+
+opcode: 0xB7
+mnemonic: OR
+operand: A
+length: 1
+cycles: 4
+flags: Z000
+
+opcode: 0xB8
+mnemonic: CP
+operand: B
+length: 1
+cycles: 4
+flags: Z1HC
+
+opcode: 0xB9
+mnemonic: CP
+operand: C
+length: 1
+cycles: 4
+flags: Z1HC
+
+opcode: 0xBA
+mnemonic: CP
+operand: D
+length: 1
+cycles: 4
+flags: Z1HC
+
+opcode: 0xBB
+mnemonic: CP
+operand: E
+length: 1
+cycles: 4
+flags: Z1HC
+
+opcode: 0xBC
+mnemonic: CP
+operand: H
+length: 1
+cycles: 4
+flags: Z1HC
+
+opcode: 0xBD
+mnemonic: CP
+operand: L
+length: 1
+cycles: 4
+flags: Z1HC
+
+opcode: 0xBE
+mnemonic: CP
+operand: (HL)
+length: 1
+cycles: 8
+flags: Z1HC
+
+opcode: 0xBF
+mnemonic: CP
+operand: A
+length: 1
+cycles: 4
+flags: Z1HC
+
+opcode: 0xC0
+mnemonic: RET
+operand: NZ
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0xC1
+mnemonic: POP
+operand: BC
+length: 1
+cycles: 12
+flags: ----
+
+opcode: 0xC2
+mnemonic: JP
+operand1: NZ
+operand2: a16
+length: 3
+cycles: 12
+flags: ----
+
+opcode: 0xC3
+mnemonic: JP
+operand: a16
+length: 3
+cycles: 16
+flags: ----
+
+opcode: 0xC4
+mnemonic: CALL
+operand1: NZ
+operand2: a16
+length: 3
+cycles: 12
+flags: ----
+
+opcode: 0xC5
+mnemonic: PUSH
+operand: BC
+length: 1
+cycles: 16
+flags: ----
+
+opcode: 0xC6
+mnemonic: ADD
+operand1: A
+operand2: d8
+length: 2
+cycles: 8
+flags: Z0HC
+
+opcode: 0xC7
+mnemonic: RST
+operand: 00H
+length: 1
+cycles: 16
+flags: ----
+
+opcode: 0xC8
+mnemonic: RET
+operand: Z
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0xC9
+mnemonic: RET
+length: 1
+cycles: 16
+flags: ----
+
+opcode: 0xCA
+mnemonic: JP
+operand1: Z
+operand2: a16
+length: 3
+cycles: 12
+flags: ----
+
+opcode: 0xCB
+mnemonic: PREFIX
+operand: CB
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0xCC
+mnemonic: CALL
+operand1: Z
+operand2: a16
+length: 3
+cycles: 12
+flags: ----
+
+opcode: 0xCD
+mnemonic: CALL
+operand: a16
+length: 3
+cycles: 24
+flags: ----
+
+opcode: 0xCE
+mnemonic: ADC
+operand1: A
+operand2: d8
+length: 2
+cycles: 8
+flags: Z0HC
+
+opcode: 0xCF
+mnemonic: RST
+operand: 08H
+length: 1
+cycles: 16
+flags: ----
+
+opcode: 0xD0
+mnemonic: RET
+operand: NC
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0xD1
+mnemonic: POP
+operand: DE
+length: 1
+cycles: 12
+flags: ----
+
+opcode: 0xD2
+mnemonic: JP
+operand1: NC
+operand2: a16
+length: 3
+cycles: 12
+flags: ----
+
+opcode: 0xD3
+mnemonic: invalid
+
+opcode: 0xD4
+mnemonic: CALL
+operand1: NC
+operand2: a16
+length: 3
+cycles: 12
+flags: ----
+
+opcode: 0xD5
+mnemonic: PUSH
+operand: DE
+length: 1
+cycles: 16
+flags: ----
+
+opcode: 0xD6
+mnemonic: SUB
+operand: d8
+length: 2
+cycles: 8
+flags: Z1HC
+
+opcode: 0xD7
+mnemonic: RST
+operand: 10H
+length: 1
+cycles: 16
+flags: ----
+
+opcode: 0xD8
+mnemonic: RET
+operand: C
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0xD9
+mnemonic: RETI
+length: 1
+cycles: 16
+flags: ----
+
+opcode: 0xDA
+mnemonic: JP
+operand1: C
+operand2: a16
+length: 3
+cycles: 12
+flags: ----
+
+opcode: 0xDB
+mnemonic: invalid
+
+opcode: 0xDC
+mnemonic: CALL
+operand1: C
+operand2: a16
+length: 3
+cycles: 12
+flags: ----
+
+opcode: 0xDD
+mnemonic: invalid
+
+opcode: 0xDE
+mnemonic: SBC
+operand1: A
+operand2: d8
+length: 2
+cycles: 8
+flags: Z1HC
+
+opcode: 0xDF
+mnemonic: RST
+operand: 18H
+length: 1
+cycles: 16
+flags: ----
+
+opcode: 0xE0
+mnemonic: LDH
+operand1: (a8)
+operand2: A
+length: 2
+cycles: 12
+flags: ----
+
+opcode: 0xE1
+mnemonic: POP
+operand: HL
+length: 1
+cycles: 12
+flags: ----
+
+opcode: 0xE2
+mnemonic: LD
+operand1: (C)
+operand2: A
+length: 2
+cycles: 8
+flags: ----
+
+opcode: 0xE3
+mnemonic: invalid
+
+opcode: 0xE4
+mnemonic: invalid
+
+opcode: 0xE5
+mnemonic: PUSH
+operand: HL
+length: 1
+cycles: 16
+flags: ----
+
+opcode: 0xE6
+mnemonic: AND
+operand: d8
+length: 2
+cycles: 8
+flags: Z010
+
+opcode: 0xE7
+mnemonic: RST
+operand: 20H
+length: 1
+cycles: 16
+flags: ----
+
+opcode: 0xE8
+mnemonic: ADD
+operand1: SP
+operand2: r8
+length: 2
+cycles: 16
+flags: 00HC
+
+opcode: 0xE9
+mnemonic: JP
+operand: (HL)
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0xEA
+mnemonic: LD
+operand1: (a16)
+operand2: A
+length: 3
+cycles: 16
+flags: ----
+
+opcode: 0xEB
+mnemonic: invalid
+
+opcode: 0xEC
+mnemonic: invalid
+
+opcode: 0xED
+mnemonic: invalid
+
+opcode: 0xEE
+mnemonic: XOR
+operand: d8
+length: 2
+cycles: 8
+flags: Z000
+
+opcode: 0xEF
+mnemonic: RST
+operand: 28H
+length: 1
+cycles: 16
+flags: ----
+
+opcode: 0xF0
+mnemonic: LDH
+operand1: A
+operand2: (a8)
+length: 2
+cycles: 12
+flags: ----
+
+opcode: 0xF1
+mnemonic: POP
+operand: AF
+length: 1
+cycles: 12
+flags: ZNHC
+
+opcode: 0xF2
+mnemonic: LD
+operand1: A
+operand2: (C)
+length: 2
+cycles: 8
+flags: ----
+
+opcode: 0xF3
+mnemonic: DI
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0xF4
+mnemonic: invalid
+
+opcode: 0xF5
+mnemonic: PUSH
+operand: AF
+length: 1
+cycles: 16
+flags: ----
+
+opcode: 0xF6
+mnemonic: OR
+operand: d8
+length: 2
+cycles: 8
+flags: Z000
+
+opcode: 0xF7
+mnemonic: RST
+operand: 30H
+length: 1
+cycles: 16
+flags: ----
+
+opcode: 0xF8
+mnemonic: LD
+operand1: HL
+operand2: SP+r8
+length: 2
+cycles: 12
+flags: 00HC
+
+opcode: 0xF9
+mnemonic: LD
+operand1: SP
+operand2: HL
+length: 1
+cycles: 8
+flags: ----
+
+opcode: 0xFA
+mnemonic: LD
+operand1: A
+operand2: (a16)
+length: 3
+cycles: 16
+flags: ----
+
+opcode: 0xFB
+mnemonic: EI
+length: 1
+cycles: 4
+flags: ----
+
+opcode: 0xFC
+mnemonic: invalid
+
+opcode: 0xFD
+mnemonic: invalid
+
+opcode: 0xFE
+mnemonic: CP
+operand: d8
+length: 2
+cycles: 8
+flags: Z1HC
+
+opcode: 0xFF
+mnemonic: RST
+operand: 38H
+length: 1
+cycles: 16
+flags: ----
+
