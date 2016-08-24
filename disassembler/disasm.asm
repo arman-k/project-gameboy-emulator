@@ -24,8 +24,10 @@ size_MB = size_KB * size_KB					; stands for 1 MB
 ; =======================================================================================================
 section '.data' data readable writable
 	;printf_s	du "%s",13,10,0				; unicode format string for a string
-	printf_d	db "%d",13,10,0				; format string for a decimal number
-
+	newline		db 13, 10, 0				; newline string
+	printf_s	db "%s", 0					; format string for a string
+	printf_d	db "%d", 13, 10, 0			; format string for a decimal number
+	
 ; =======================================================================================================
 ;section '.bss'  readable writable
 ;	wow1	db ?
@@ -60,11 +62,11 @@ start:
 	push	eax
 	call	[CommandLineToArgvW]
 	mov 	dword[ebp+.szArglist], eax
-	cmp	dword[ebp+.pNumArgs], 1
-	jle	.commandLinetoArgvW_fail			; raise error if there are less than 2 arguments
+	cmp		dword[ebp+.pNumArgs], 1
+	jle		.commandLinetoArgvW_fail		; raise error if there are less than 2 arguments
 	
-	mov	ebx, dword[eax+4]					; save the address of the first argument
-	mov	dword[ebp+.inFilename], ebx		
+	mov		ebx, dword[eax+4]				; save the address of the first argument
+	mov		dword[ebp+.inFilename], ebx		
 	;mov	ebx, dword[eax+8]				; save the address of the second argument
 	;mov	dword[ebp+.outFilename], ebx		
 
@@ -75,7 +77,7 @@ start:
 	;add	esp, 8
 	;jmp	.exit
 
-	; Gameboy ROMS are usually 1024 MB in size. 
+	; Gameboy ROMS are usually 1024 KB in size. 
 	; An extra byte is being allocated for the terminating null byte.
 	push	size_MB+1				
 	call	[malloc]
@@ -95,8 +97,11 @@ start:
 	je		.io_rom_fail
 	mov		dword[ebp+.bytesRead], eax
 	
+	push	size_MB
+	push	dword[ebp+.mallocRom]
+	call	disassemble
+	add		esp, 4*2
 	
-
 	;push	dword[ebp+.bytesRead]
 	;push	printf_d
 	;call	[printf]						; print the number of bytes read
@@ -152,6 +157,28 @@ start:
 	push	0
 	call 	[ExitProcess]					; Exit the process
 
+; =======================================================================================================
+; void print_intro (void)
+; parameters=>
+; void
+; returns=>
+; void
+; operation=>
+; Prints an intro of the disassembler to the console
+;
+print_intro:
+	pushad									; backup all registers
+
+	jmp     .skip_data						; skip over the string
+	.print_intro_data	db 'Welcome to the LR35902 Disassembler!', 13, 10, 0
+.skip_data:
+	push	.print_intro_data
+	call	[printf]						; print the intro
+	add 	esp, 4
+
+	popad									; restore all registers					
+	ret
+	
 ; =======================================================================================================
 ; int read_rom (char* buffer, int size, char* filename)
 ; parameters=>
@@ -238,6 +265,73 @@ read_rom:
 	ret
 
 ; =======================================================================================================
+; void disassemble(char* buffer, int szrom)
+; parameters=>
+; buffer: buffer containing the rom file
+; szrom: size of the rom in bytes
+; returns=>
+; void
+; operation=>
+; decodes stream of bytes in buffer and prints their corresponding assembly code 
+;
+disassemble:
+	.buffer = 8h
+	.szrom 	= 0ch
+	.pc		= -4h
+	push	ebp
+	mov		ebp, esp
+	pushad
+	mov		dword[ebp+.pc], 0
+	
+	; Perform checksum operations and dump general information about the rom
+	push	dword[ebp+.buffer]
+	call	print_info
+	add		esp, 4
+	
+	push	.disasm_start
+	call	[printf]
+	add		esp, 4
+	
+	; Fetch the execution point from the jump address at 0x0102h
+	mov		ebx, dword[ebp+.buffer]
+	add		ebx, 100h
+	inc		ebx
+	cmp		byte[ebx], 0c3h
+	jne		.exit
+	inc		ebx
+	xor		ecx, ecx
+	mov		cx, word[ebx]
+	mov		dword[ebp+.pc], ecx				; update program counter with this execution point
+	
+	; Start disassembling from the execution point
+.next_op:
+	push	dword[ebp+.pc]
+	push	.printf_x
+	call	[printf]						; print current address
+	add		esp, 4*2
+	lea		ebx, [ebp+.pc]
+	push	ebx
+	push	dword[ebp+.buffer]
+	call	decode							; decode the opcode at current address
+	add		esp, 4*2
+	mov		eax, dword[ebp+.szrom]
+	cmp		dword[ebp+.pc], eax
+	jl		.next_op
+
+.exit:
+	popad
+	pop		ebp
+	ret
+
+	.printf_x		db "0x%04x: ", 0
+	.disasm_start	db 13,10,13,10,"Disassembly start: ",13,10,0
+
+	; contains decode subroutine
+	include 'decode.asm'
+	; contains print_info and related subroutines 
+	include	'rom_info.asm'
+
+; =======================================================================================================
 ; int write_rom (char* buffer, int size, char* filename)
 ; parameters=>
 ; buffer: buffer containing the ROM to write
@@ -247,6 +341,8 @@ read_rom:
 ; number of bytes actually written
 ; operation=>
 ; Writes the rom from memory to a file of given maximum size
+; additional comments=>
+; this subroutine is not really needed anymore. it was written as a test for read_rom
 ;
 write_rom:
 	.buffer = 8h					
@@ -321,40 +417,7 @@ write_rom:
 	add		esp, 4*2
 	pop		ebp					
 	ret
-
-; =======================================================================================================
-; int decode (void)
-; parameters=>
-; void
-; returns=>
-; void
-; operation=>
-; Prints an intro of the disassembler to the console
-;
-
-
-; =======================================================================================================
-; void print_intro (void)
-; parameters=>
-; void
-; returns=>
-; void
-; operation=>
-; Prints an intro of the disassembler to the console
-;
-print_intro:
-	pushad									; backup all registers
-
-	jmp     .skip_data						; skip over the string
-	.print_intro_data	db 'Welcome to the LR35902 Disassembler!', 13, 10, 0
-.skip_data:
-	push	.print_intro_data
-	call	[printf]						; print the intro
-	add 	esp, 4
-
-	popad									; restore all registers					
-	ret
-
+	
 ; =======================================================================================================
 section '.idata' import data readable
 
