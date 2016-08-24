@@ -240,7 +240,7 @@ void generate_strings(char* filename, struct INSTRUCTION* inst_op[], struct INST
 		if (inst_op[i]->opcode != 0xCB)		//Skip the prefix instruction
 		{
 			fprintf(fp, ".a%02x db ", i);
-			fprintf(fp, "\"%-5s  ", inst_op[i]->mnemonic);
+			fprintf(fp, "\"0x%02x   %-5s  ", i, inst_op[i]->mnemonic);
 			//format the operands with a format string in case the operand is a 8/16-bit data/address
 			if (inst_op[i]->operands[0] != NULL)
 				g_format_string(fp, inst_op[i]->operands[0]);				
@@ -258,7 +258,7 @@ void generate_strings(char* filename, struct INSTRUCTION* inst_op[], struct INST
 	for (i = 0; i < 256; i++)
 	{
 		fprintf(fp, ".b%02x db ", i);
-		fprintf(fp, "\"%-5s  ", inst_cbop[i]->mnemonic);
+		fprintf(fp, "\"0xcb%02x %-5s  ", i, inst_cbop[i]->mnemonic);
 		if (inst_cbop[i]->operands[0] != NULL) 
 			g_format_string(fp, inst_cbop[i]->operands[0]);				
 		if (inst_cbop[i]->operands[1] != NULL)

@@ -2,17 +2,29 @@
 ; A Nintendo Gameboy Emulator
 ;
 ; =======================================================================================================
-; Disassembler for Gameboy (LR35902) ROMs
+; Crude Sequential Disassembler for Gameboy (LR35902) ROMs
 ; =======================================================================================================
-; Starting in: 18/9/16
-; More description to be added here 
+; Started in: 19/9/16
+; 
+; Description:
+; This is a disassembler for Gameboy (LR35902 CPU) ROMs.
+; It is of course a very crude one (and is intentionally so), in the sense that it sequentially interprets all the bytes in the rom as instructions. This is of course wrong but can still be made useful with manual inspection. 
+; Creating a more complex disassembler would be an overkill and a distraction from the main project (it is not actually necessary) - the Gameboy Emulator itself.
+; I still felt like it would be a nice thing to have. It also helped me verify that the ROM indeed is made for the Gameboy.
+; Moreover, I wanted this to be a sort of warmup with FASM assembly. Also, instead of manually writing or copy-pasting boring repetitive code, I instead wrote a code generator in C (as a warmup for C programming - yes I have been detached from it for over a year) that emits the repetitive assembly code.
+; Furthermore, I had to create a sort of opcode db for the disassembler (the code generator needs the properties of each opcode to generate code). I can reuse this db for further code generation while writing the emulator. 
+; Finally, I had to read parts of the GBCPU manual for this job. This is hopefully going to help me writing the actual emulator as well.
+; 
+; Note:
+; Please pipe the output produced to a file: disasm.exe rom.gb > dump.txt
+; For some reason, the piped output has double newlines in place of single newlines. The produced file is therefore quite sparse.
+; If this bugs you, you can try removing 0x13 from the newline string in the data section. It stops emitting double newlines.
 ;
 
 format PE console
 entry start
 
 include 'win32a.inc'						; contains common structs and constants for WINAPI
-include 'encoding/utf8.inc'					; contains support for UTF-8
 include 'disasm_h.inc'						; contains some constants from WINAPI not present in win32a
 
 ; =======================================================================================================
@@ -23,10 +35,7 @@ size_MB = size_KB * size_KB					; stands for 1 MB
 
 ; =======================================================================================================
 section '.data' data readable writable
-	;printf_s	du "%s",13,10,0				; unicode format string for a string
 	newline		db 13, 10, 0				; newline string
-	printf_s	db "%s", 0					; format string for a string
-	printf_d	db "%d", 13, 10, 0			; format string for a decimal number
 	
 ; =======================================================================================================
 ;section '.bss'  readable writable
@@ -51,9 +60,11 @@ start:
 	.bytesRead = -14h						; number of bytes actually read from the file
 	.outFilename = -18h						; address of the name of the output file
 	.bytesWritten = -1ch					; number of bytes actually written to the new file
-	sub	esp, 4*7							; keep space for local variables
+	sub		esp, 4*7						; keep space for local variables
 
-	call	print_intro						; print an intro to the disassembler
+	push	.print_intro_data
+	call	[printf]						; print an intro to the disassembler
+	add		esp, 4				
 
 	call	[GetCommandLineW]				; fetch the command line string
 	; call CommandLineToArgvW to transform the command line string into an array of arguments
@@ -67,17 +78,8 @@ start:
 	
 	mov		ebx, dword[eax+4]				; save the address of the first argument
 	mov		dword[ebp+.inFilename], ebx		
-	;mov	ebx, dword[eax+8]				; save the address of the second argument
-	;mov	dword[ebp+.outFilename], ebx		
-
-	; print the unicode filename
-	;push    ebx
-	;push	printf_s
-	;call	[wprintf]
-	;add	esp, 8
-	;jmp	.exit
-
-	; Gameboy ROMS are usually 1024 KB in size. 
+	
+	; Gameboy ROMS are usually upto 1024 KB in size (very rarely are they more than this). If it's more than this, adjust the size parameter accordingly. 
 	; An extra byte is being allocated for the terminating null byte.
 	push	size_MB+1				
 	call	[malloc]
@@ -85,7 +87,6 @@ start:
 	cmp		eax, 0
 	je		.malloc_fail					; raise error if null was returned
 	mov		dword[ebp+.mallocRom], eax
-
 
 	; Read the rom from file to memory
 	push	dword[ebp+.inFilename]
@@ -102,27 +103,6 @@ start:
 	call	disassemble
 	add		esp, 4*2
 	
-	;push	dword[ebp+.bytesRead]
-	;push	printf_d
-	;call	[printf]						; print the number of bytes read
-	;add	esp, 4*2
-
-
-	; Write the rom from memory to file
-	;push	dword[ebp+.outFilename]
-	;push	dword[ebp+.bytesRead]
-	;push	dword[ebp+.mallocRom]
-	;call	write_rom
-	;add	esp, 4*3
-	;cmp	eax, 0							; exit if file couldn't be written (error is already raised in write_rom)
-	;je	.io_rom_fail
-	;mov	dword[ebp+.bytesWritten], eax
-
-	;push	dword[ebp+.bytesWritten]
-	;push	printf_d
-	;call	[printf]						; print the number of bytes written
-	;add	esp, 4*2
-
 .io_rom_fail:
 	push	dword[ebp+.mallocRom]
 	call	[free]							; free the allocated memory
@@ -130,19 +110,12 @@ start:
 	jmp		.exit
 
 .commandLinetoArgvW_fail:
-	jmp		.skip_commandLinetoArgvW_fail_data
-	.commandLinetoArgvW_fail_data	db 'Please provide a filename as an argument like this:', 13, 10
-									db '>disasm.exe inxxxRom.gb', 13, 10, 0
-.skip_commandLinetoArgvW_fail_data:
 	push	.commandLinetoArgvW_fail_data
 	call	[printf]						; here if no argument was provided
 	add		esp, 4
 	jmp		.exit
 
 .malloc_fail:
-	jmp		.skip_malloc_fail_data
-	.malloc_fail_data	db 'Failed to allocate space for loading ROM.', 13, 10, 0
-.skip_malloc_fail_data:
 	push	.malloc_fail_data
 	call	[printf]						; here if malloc failed
 	add		esp, 4
@@ -157,28 +130,11 @@ start:
 	push	0
 	call 	[ExitProcess]					; Exit the process
 
-; =======================================================================================================
-; void print_intro (void)
-; parameters=>
-; void
-; returns=>
-; void
-; operation=>
-; Prints an intro of the disassembler to the console
-;
-print_intro:
-	pushad									; backup all registers
+	.print_intro_data				db 'Welcome to the LR35902 Disassembler!', 13, 10, 0
+	.commandLinetoArgvW_fail_data	db 'Please provide a rom as an argument like this:', 13, 10
+									db '>disasm.exe [filename.gb]', 13, 10, 0
+	.malloc_fail_data				db 'Failed to allocate space for loading ROM.', 13, 10, 0
 
-	jmp     .skip_data						; skip over the string
-	.print_intro_data	db 'Welcome to the LR35902 Disassembler!', 13, 10, 0
-.skip_data:
-	push	.print_intro_data
-	call	[printf]						; print the intro
-	add 	esp, 4
-
-	popad									; restore all registers					
-	ret
-	
 ; =======================================================================================================
 ; int read_rom (char* buffer, int size, char* filename)
 ; parameters=>
@@ -237,10 +193,7 @@ read_rom:
 	; call GetLastError to check what the last error was
 	call	[GetLastError]
 	cmp		eax, ERROR_FILE_NOT_FOUND
-	je		.file_not_found				
-	jmp		.skip_unknown_error_data		
-	.unknown_error_data		db 'Reading file - unknown error', 13, 10, 0
-.skip_unknown_error_data:
+	je		.file_not_found	
 	push	.unknown_error_data
 	call	[printf]						; here if the error is unknown
 	add		esp, 4
@@ -248,9 +201,6 @@ read_rom:
 	jmp		.exit
 
 .file_not_found:
-	jmp		.skip_file_not_found_data
-	.file_not_found_data	db 'The system cannot find the file specified.', 13, 10, 0
-.skip_file_not_found_data:
 	push	.file_not_found_data
 	call	[printf]						; here if the file was not found
 	add		esp, 4
@@ -264,6 +214,8 @@ read_rom:
 	pop		ebp								; destroy stack frame
 	ret
 
+	.file_not_found_data		db 'The system cannot find the file specified.', 13, 10, 0
+	.unknown_error_data			db 'Reading file - unknown error', 13, 10, 0
 ; =======================================================================================================
 ; void disassemble(char* buffer, int szrom)
 ; parameters=>
@@ -303,6 +255,8 @@ disassemble:
 	mov		cx, word[ebx]
 	mov		dword[ebp+.pc], ecx				; update program counter with this execution point
 	
+	; Currently I just overwrote dword[ebp+.pc] with 0. So the code that just ran above has no effect.
+	;mov		dword[ebp+.pc], 0				
 	; Start disassembling from the execution point
 .next_op:
 	push	dword[ebp+.pc]
@@ -323,100 +277,23 @@ disassemble:
 	pop		ebp
 	ret
 
-	.printf_x		db "0x%04x: ", 0
-	.disasm_start	db 13,10,13,10,"Disassembly start: ",13,10,0
+	.printf_x		db "0x%04x: ", 0		; format string for printing hex addresses
+	.disasm_start	db 13,10,13,10,"(Please note that this is a very crude disassembly."
+					db 13,10,"It simply disassembles every byte sequentially, "
+					db 13,10,"and has thus interpreted all the data as instructions as well."
+					db 13,10,"If you notice a non-sensical sequence of instructions like this: "
+					db 13,10,"0x0165: 0xf0   LDH    A, (0x00)"
+					db 13,10,"0x0167: 0xf0   LDH    A, (0x00)"
+					db 13,10,"0x0169: 0xf0   LDH    A, (0x00)"
+					db 13,10,"the bytes around it are probably meant to be data, not instructions."
+					db 13,10,"If you notice invalid instructions, the bytes around it are definitely meant to be data."
+					db 13,10,"The actual execution point starts at 0x150.)"
+					db 13,10,"Disassembly start: ",13,10,0
 
 	; contains decode subroutine
 	include 'decode.asm'
 	; contains print_info and related subroutines 
 	include	'rom_info.asm'
-
-; =======================================================================================================
-; int write_rom (char* buffer, int size, char* filename)
-; parameters=>
-; buffer: buffer containing the ROM to write
-; size: maximum number of bytes to write
-; filename: name of the new file (ROM)
-; returns=>
-; number of bytes actually written
-; operation=>
-; Writes the rom from memory to a file of given maximum size
-; additional comments=>
-; this subroutine is not really needed anymore. it was written as a test for read_rom
-;
-write_rom:
-	.buffer = 8h					
-	.size = 0ch
-	.filename_addr = 10h
-	.lpNumberOfBytesWritten = -4h			; number of bytes actually written
-	.fileHandle = -8h						; a handle to the created file (the new ROM)
-	push	ebp
-	mov 	ebp, esp				
-	sub		esp, 4*2
-
-	push	ebx ecx edx esi edi			
-
-	; call CreateFileW to open a handle to a new ROM file
-	push	0
-	push	FILE_ATTRIBUTE_NORMAL
-	push	CREATE_NEW
-	push	0
-	push 	FILE_SHARE_READ
-	push	GENERIC_WRITE
-	push	dword[ebp+.filename_addr]
-	call	[CreateFileW]
-	cmp		eax, INVALID_HANDLE_VALUE
-	je		.error							; raise error if the handle is invalid
-	mov		dword[ebp+.fileHandle], eax
-
-	; call WriteFile to write from memory to ROM handle
-	push	0
-	lea		ebx, [ebp+.lpNumberOfBytesWritten]
-	push	ebx 
-	push	dword[ebp+.size]
-	push	dword[ebp+.buffer]
-	push	dword[ebp+.fileHandle]
-	call	[WriteFile]
-	cmp		eax, 0
-	je		.error							; raise error if null is returned
-
-	; call CloseHandle to close the handle to the new ROM file (to release resources)
-	push	dword[ebp+.fileHandle]
-	call	[CloseHandle]
-	
-	mov		eax, dword[ebp+.lpNumberOfBytesWritten]	; return number of bytes written
-	jmp		.exit
-
-.error:
-	; call GetLastError to check what the last error was
-	call	[GetLastError]
-	cmp		eax, ERROR_FILE_EXISTS
-	je		.file_exists			
-	jmp		.skip_unknown_error_data		
-	.unknown_error_data		db 'Writing file - unknown error', 13, 10, 0
-.skip_unknown_error_data:
-	push	.unknown_error_data
-	call	[printf]						; here if the error is unknown
-	add		esp, 4
-	mov		eax, 0							; return null
-	jmp		.exit
-
-.file_exists:
-	jmp		.skip_file_exists_data
-	.file_exists_data	db 'The file to be written already exists.', 13, 10, 0
-.skip_file_exists_data:
-	push	.file_exists_data
-	call	[printf]						; here if the file already exists
-	add		esp, 4
-	mov 	eax, 0
-	jmp		.exit
-
-.exit:
-	pop	edi esi edx ecx ebx			
-
-	add		esp, 4*2
-	pop		ebp					
-	ret
 	
 ; =======================================================================================================
 section '.idata' import data readable
@@ -442,6 +319,5 @@ import  shell, \
 ; must balance the stack after calling these subroutines
 import	msvcrt, \
 	printf, 'printf', \
-	wprintf, 'wprintf', \
 	malloc, 'malloc', \
 	free, 'free'

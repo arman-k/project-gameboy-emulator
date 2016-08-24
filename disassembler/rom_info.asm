@@ -132,7 +132,7 @@ print_info:
 	add		eax, 14Ch
 	mov		bl, byte[eax]
 	push	ebx
-	push	printf_d
+	push	.printf_d
 	call	[printf]
 	add		esp, 4*2
 	
@@ -140,6 +140,7 @@ print_info:
 	pop		ebp
 	ret
 
+	.printf_d	db "%d", 13, 10, 0			; format string for a decimal number
 	.loaded		db "Cartridge has been successfully loaded!", 13, 10, 0
 	.title		db "Title of the game: %s", 13, 10, 0
 	.color_gb	db "Color GB: ", 0
