@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Project Gameboy Emulator
 
 *Project Gameboy Emulator* is a personal endeavor in trying to create a Gameboy Emulator for Windows.
@@ -52,7 +51,3 @@ You should pipe the output to some dumpfile because it consists of over a millio
 **Have fun playing with various ROMs!**
 
 ***To be continued...***
-=======
-# project-gameboy-emulator
-A Gameboy Emulator for Windows written in FASM assembly
->>>>>>> 857925b44a61a079a3d919c5768a96422d4064ec
