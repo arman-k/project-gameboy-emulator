@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Project Gameboy Emulator
 
 *Project Gameboy Emulator* is a personal endeavor in trying to create a Gameboy Emulator for Windows.
@@ -13,7 +14,6 @@ For now, I only have a crude disassembler prepared.
 Anyways, the codebase is organized as follows:
 
 codegen:
-  - 
   - codegen.c 
   - opdb.txt
   - opcbdb.txt
@@ -21,7 +21,6 @@ codegen:
 Codegen is a code generator written in C that generates instructions and strings required by the disassembler. opdb.txt and opcbdb.txt are files that contain various properties of the opcodes of the Gameboy CPU in a usable format. codegen.c uses these text files to load the properties into memory. Based upon these properties, codegen can then be programmed and delegated to generate repetitive code for various purposes.
 
 disassembler:
-  -
   - decode.asm
   - decode_op.asm
   - decode_str.asm
@@ -53,3 +52,7 @@ You should pipe the output to some dumpfile because it consists of over a millio
 **Have fun playing with various ROMs!**
 
 ***To be continued...***
+=======
+# project-gameboy-emulator
+A Gameboy Emulator for Windows written in FASM assembly
+>>>>>>> 857925b44a61a079a3d919c5768a96422d4064ec
